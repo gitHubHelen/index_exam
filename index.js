@@ -294,7 +294,7 @@ function resetExam() {
 }
 
 // 计时器功能
-let totalSeconds = examData.length * 0.5; // 60分钟
+let totalSeconds = examData.length * 0.5 * 60; // 60分钟
 const timerElement = document.getElementById('timer');
 
 function updateTimer() {
