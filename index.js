@@ -84,6 +84,8 @@ document.addEventListener('DOMContentLoaded', async function () {
         examData = data
         // 设置题目总数
         document.getElementById('total-titles').textContent = examData.length;
+        document.getElementById('total-score').textContent = examData.length * 2;
+        document.getElementById('total-time').textContent = examData.length * 0.5;
         document.getElementById('exam-id').textContent = examId
         rendertquestions();
     } catch (error) {
@@ -292,7 +294,7 @@ function resetExam() {
 }
 
 // 计时器功能
-let totalSeconds = 60 * 60; // 60分钟
+let totalSeconds = totalQuestions.length * 0.5; // 60分钟
 const timerElement = document.getElementById('timer');
 
 function updateTimer() {
