@@ -1,4 +1,4 @@
-const host = 'http://127.0.0.1:3000';
+const host = 'http://121.43.26.102:3000';
 // 题目存储器
 let examData = []
 // 存储错题信息
