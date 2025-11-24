@@ -191,7 +191,7 @@ function submitExam() {
                 // 添加到错题数组
                 wrongQuestions.push({
                     id: question.id,
-                    question: question.question_text,
+                    questionText: question.question_text,
                     correctAnswer: question.correct_answer,
                     userAnswer: selectedOption.value,
                     explanation: question.explanation
@@ -229,7 +229,7 @@ function submitExam() {
                             <div class="wrong-title-item">
                                 <p><strong>题目${q.id}:</strong> ${q.questionText}</p>
                                 <p><strong>你的答案:</strong> ${q.userAnswer}</p>
-                                <p><strong>正确答案:</strong> ${q.correct_answer}</p>
+                                <p><strong>正确答案:</strong> ${q.correctAnswer}</p>
                                 <p><strong>解析:</strong> ${q.explanation}</p>
                             </div>
                         `).join('')}
