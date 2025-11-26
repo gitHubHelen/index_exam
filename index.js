@@ -1,9 +1,11 @@
 const host = 'http://121.43.26.102:3000';
+// const host = 'http://localhost:3000';
 // 题目存储器
 let examData = []
 // 存储错题信息
 let wrongQuestions = [];
-
+let timerInterval = null, timerElement = null;
+let totalSeconds = 0;
 
 // 下载数据到本地
 function downloadData(exportData) {
@@ -20,12 +22,7 @@ function downloadData(exportData) {
 }
 
 // 导出错题为JSON文件
-function exportwrongQuestions() {
-    if (wrongQuestions.length === 0) {
-        alert('还得是你👍🏻，满分选手哦💐💐💐');
-        return;
-    }
-
+function exportwrongQuestions(timeUsed) {
     const studentName = document.getElementById('student-name').value.trim();
 
     const exportData = {
@@ -33,7 +30,7 @@ function exportwrongQuestions() {
         examId: 'CIESCR1202409',
         wrongList: wrongQuestions.map(item => item.id),
         exportTime: new Date().toLocaleString('zh-CN'),
-        timeUsed: timerElement.textContent
+        timeUsed
     };
 
     sendToServer(exportData)
@@ -41,8 +38,6 @@ function exportwrongQuestions() {
 
 // 模拟发送到服务器的函数
 function sendToServer(data) {
-    // 在实际应用中，这里应该使用fetch或XMLHttpRequest将数据发送到服务器
-    // 在实际应用中，这里应该使用fetch或XMLHttpRequest将数据发送到服务器
     fetch(`${host}/api/error-questions/`, {
         method: 'POST',
         headers: {
@@ -50,15 +45,20 @@ function sendToServer(data) {
         },
         body: JSON.stringify(data)
     })
-        .then(response => response.json())
-        .then(data => {
-            console.log('提交成功:', data);
+        .then(res => {
+            console.log(res)
+            if (data.wrongList.length === 0) {
+                alert('还得是你👍🏻，满分选手哦💐💐💐');
+            } else {
+                alert('感谢今天的自己♪(･ω･)ﾉ，向优秀的你又迈进了一步🎉🎉🎉')
+            }
         })
         .catch((error) => {
             console.error('提交错误:', error);
         });
 }
 
+// 获取试卷列表
 async function fetchData() {
     return fetch(`${host}/api/questions/CIESCR1202409`)
         .then(response => {
@@ -77,8 +77,25 @@ async function fetchData() {
         });
 }
 
+// 计时器
+function updateTimer() {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    if (totalSeconds <= 0) {
+        clearInterval(timerInterval);
+        alert('考试时间到！系统将自动提交试卷。');
+        submitExam();
+    } else {
+        totalSeconds--;
+    }
+
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
 // 初始化考试
 document.addEventListener('DOMContentLoaded', async function () {
+    timerElement = document.getElementById('timer');
     try {
         let { data, examId } = await fetchData()
         examData = data
@@ -87,6 +104,13 @@ document.addEventListener('DOMContentLoaded', async function () {
         document.getElementById('total-score').textContent = examData.length * 2;
         document.getElementById('total-time').textContent = examData.length * 0.5;
         document.getElementById('exam-id').textContent = examId
+        // 计时器功能
+        totalSeconds = examData.length * 0.5 * 60 // 60分钟
+        // 渲染计时器
+        timerInterval = setInterval(() => {
+            const textContent = updateTimer(timerElement)
+            timerElement.textContent = textContent
+        }, 1000);
         rendertquestions();
     } catch (error) {
         console.error(error)
@@ -208,7 +232,6 @@ function submitExam() {
                         </div>
                     `;
 
-            console.log(question, '111')
             // 添加到错题数组
             wrongQuestions.push({
                 id: question.id,
@@ -261,13 +284,12 @@ function submitExam() {
     document.getElementById('student-id').disabled = true;
     document.getElementById('student-class').disabled = true;
 
-    exportwrongQuestions() // 保存错题到服务器
+    // 停止计时器
+    clearInterval(timerInterval);
+    exportwrongQuestions(timerElement.textContent) // 保存错题到服务器
 
     // 滚动到结果区域
     resultContainer.scrollIntoView({ behavior: 'smooth' });
-
-    // 停止计时器
-    clearInterval(timerInterval);
 }
 
 // 重置考试
@@ -293,23 +315,3 @@ function resetExam() {
     wrongQuestions = [];
 }
 
-// 计时器功能
-let totalSeconds = examData.length * 0.5 * 60 || 3600; // 60分钟
-const timerElement = document.getElementById('timer');
-
-function updateTimer() {
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-
-    timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-
-    if (totalSeconds <= 0) {
-        clearInterval(timerInterval);
-        alert('考试时间到！系统将自动提交试卷。');
-        submitExam();
-    } else {
-        totalSeconds--;
-    }
-}
-
-const timerInterval = setInterval(updateTimer, 1000);
